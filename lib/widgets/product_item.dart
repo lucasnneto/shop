@@ -39,11 +39,28 @@ class ProductItem extends StatelessWidget {
           ),
           title: Text(product.title, textAlign: TextAlign.center),
           trailing: IconButton(
-            onPressed: () {
-              cart.addItem(product);
-            },
             color: Theme.of(context).accentColor,
             icon: Icon(Icons.shopping_cart),
+            onPressed: () {
+              Scaffold.of(context).hideCurrentSnackBar();
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Produto adicionado com sucesso!"),
+                  duration: Duration(seconds: 2),
+                  action: SnackBarAction(
+                    label: 'CANCELAR',
+                    onPressed: () {
+                      cart.removeSingleItem(product.id);
+                    },
+                  ),
+                ),
+              );
+              //NOT DEPRECATED
+              // ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              // ScaffoldMessenger.of(context)
+              //     .showSnackBar(SnackBar(content: Text("Teste")));
+              cart.addItem(product);
+            },
           ),
         ),
       ),
