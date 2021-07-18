@@ -67,7 +67,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _imageUrlFocusNode.dispose();
   }
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
     var isValid = _form.currentState!.validate();
     if (!isValid) return;
     _form.currentState!.save();
@@ -84,25 +84,28 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     final products = Provider.of<Products>(context, listen: false);
 
     if (_formData['id'] == null) {
-      products.addProduct(newProduct).catchError((error) {
-        return showDialog<Null>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-                  title: Text('Ocorreu um erro!'),
-                  content: Text('Ocorreu um erro para salvar o produto!'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text('Ok'),
-                    )
-                  ],
-                ));
-      }).then((_) {
+      try {
+        await products.addProduct(newProduct);
+        Navigator.of(context).pop();
+      } catch (error) {
+        await showDialog<Null>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('Ocorreu um erro!'),
+            content: Text('Ocorreu um erro para salvar o produto!'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text('Fechar'),
+              )
+            ],
+          ),
+        );
+      } finally {
         setState(() {
           _isLoading = false;
         });
-        Navigator.of(context).pop();
-      });
+      }
     } else {
       products.updateProduct(newProduct);
       setState(() {
@@ -179,11 +182,12 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         keyboardType: TextInputType.multiline,
                         focusNode: _descriptionFocusNode,
                         onSaved: (value) => _formData['description'] = value!,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value!.trim().isEmpty)
                             return 'Informe uma descrição valido';
-                          if (value.trim().length < 10)
-                            return 'Informe uma descrição com no min 10 letras';
+                          if (value.trim().length < 5)
+                            return 'Informe uma descrição com no min 5 letras';
                           return null;
                         }),
                     Row(
