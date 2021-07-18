@@ -29,8 +29,8 @@ class ProductItem extends StatelessWidget {
             IconButton(
               color: Theme.of(context).errorColor,
               icon: Icon(Icons.delete),
-              onPressed: () {
-                showDialog(
+              onPressed: () async {
+                bool value = await showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: Text('Excluir Produto'),
@@ -50,12 +50,17 @@ class ProductItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                ).then((value) {
-                  if (value) {
-                    Provider.of<Products>(context, listen: false)
-                        .deleteProduct(product.id!);
-                  }
-                });
+                );
+                // .then((value) {
+                //   if (value) {
+                //     Provider.of<Products>(context, listen: false)
+                //         .deleteProduct(product.id!);
+                //   }
+                // });
+                if (value) {
+                  Provider.of<Products>(context, listen: false)
+                      .deleteProduct(product.id!);
+                }
               },
             ),
           ],
