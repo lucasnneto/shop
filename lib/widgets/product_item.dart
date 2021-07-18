@@ -1,67 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/product.dart';
-import '../providers/cart.dart';
-import '../utils/App_routes.dart';
+import 'package:shop/providers/product.dart';
+import 'package:shop/providers/products.dart';
+import 'package:shop/utils/App_routes.dart';
 
 class ProductItem extends StatelessWidget {
+  final Product product;
+  ProductItem(this.product);
   @override
   Widget build(BuildContext context) {
-    final Product product = Provider.of<Product>(context, listen: false);
-    final Cart cart = Provider.of<Cart>(context, listen: false);
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: GridTile(
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pushNamed(
-              AppRoutes.PRODUCT_DETAIL,
-              arguments: product,
-            );
-          },
-          child: Image.network(
-            product.imageUrl,
-            fit: BoxFit.cover,
-          ),
-        ),
-        footer: GridTileBar(
-          backgroundColor: Colors.black87,
-          leading: Consumer<Product>(
-            builder: (ctx, product, _) => IconButton(
-              icon: Icon(
-                  product.isFavorite ? Icons.favorite : Icons.favorite_border),
-              color: Theme.of(context).accentColor,
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundImage: NetworkImage(product.imageUrl),
+      ),
+      title: Text(product.title),
+      trailing: Container(
+        width: 100,
+        child: Row(
+          children: [
+            IconButton(
+              color: Theme.of(context).primaryColor,
+              icon: Icon(Icons.edit),
               onPressed: () {
-                product.toggleFavorite();
+                Navigator.of(context)
+                    .pushNamed(AppRoutes.PRODUCTS_FORM, arguments: product);
               },
             ),
-          ),
-          title: Text(product.title, textAlign: TextAlign.center),
-          trailing: IconButton(
-            color: Theme.of(context).accentColor,
-            icon: Icon(Icons.shopping_cart),
-            onPressed: () {
-              Scaffold.of(context).hideCurrentSnackBar();
-              Scaffold.of(context).showSnackBar(
-                SnackBar(
-                  content: Text("Produto adicionado com sucesso!"),
-                  duration: Duration(seconds: 2),
-                  action: SnackBarAction(
-                    label: 'CANCELAR',
-                    onPressed: () {
-                      cart.removeSingleItem(product.id);
-                    },
+            IconButton(
+              color: Theme.of(context).errorColor,
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text('Excluir Produto'),
+                    content: Text('Tem certeza?'),
+                    actions: [
+                      TextButton(
+                        child: Text('Não'),
+                        onPressed: () {
+                          Navigator.of(context).pop(false);
+                        },
+                      ),
+                      TextButton(
+                        child: Text('Sim'),
+                        onPressed: () {
+                          Navigator.of(context).pop(true);
+                        },
+                      ),
+                    ],
                   ),
-                ),
-              );
-              //NOT DEPRECATED
-              // ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              // ScaffoldMessenger.of(context)
-              //     .showSnackBar(SnackBar(content: Text("Teste")));
-              cart.addItem(product);
-            },
-          ),
+                ).then((value) {
+                  if (value) {
+                    Provider.of<Products>(context, listen: false)
+                        .deleteProduct(product.id!);
+                  }
+                });
+              },
+            ),
+          ],
         ),
       ),
     );
