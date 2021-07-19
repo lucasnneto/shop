@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shop/exceptions/http_exception.dart';
+import 'package:shop/utils/constants.dart';
 
 class Product with ChangeNotifier {
   final String? id;
@@ -28,8 +29,7 @@ class Product with ChangeNotifier {
   void toggleFavorite() async {
     _toggleFavorite();
     try {
-      final url =
-          "https://flutter-cod3r-a280a-default-rtdb.firebaseio.com/products";
+      final url = "${Constants.BASE_API_URL}/products";
 
       final response = await http.patch(
         Uri.parse('$url/$id.json'),
